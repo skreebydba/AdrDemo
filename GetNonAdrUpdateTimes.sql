@@ -1,28 +1,13 @@
-USE ADRMetrics;
+USE NonAdrTest;
 
 SET NOCOUNT ON;
-
-DROP TABLE IF EXISTS #LogInfo;
-
-CREATE TABLE #LogInfo
-(RowId INT IDENTITY(1,1)
-,TableName SYSNAME
-,VlfStatus CHAR(10)
-,VlfTypeSizeMb BIGINT
-,VlfTypeCount BIGINT
-,[Duration (ms)] BIGINT);
 
 DECLARE @starttime DATETIME,
 @Duration BIGINT;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
 
-INSERT INTO #LogInfo
-(TableName
-,VlfStatus
-,VlfTypeSizeMb
-,VlfTypeCount
-,[Duration (ms)])
+
 SELECT 
 N'StartValues' AS TableName,
 CASE
@@ -31,19 +16,20 @@ CASE
 END AS VlfStatus, 
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
-0
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+0 AS Duration
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 BEGIN TRANSACTION
 
-DELETE FROM AdrTest1000
+UPDATE AdrTest1000
+SET TextCol1 = 'Changed'
 WHERE RowId % 2 = 0;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
 SELECT 
-N'Delete 1000' AS TableName,
+N'Update 1000' AS TableName,
 CASE
 	WHEN vlf_status = 0 THEN N'Free'
 	WHEN vlf_status = 2 THEN N'Active'
@@ -51,7 +37,7 @@ END AS VlfStatus,
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
 @Duration AS [Duration (ms)]
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
@@ -60,12 +46,6 @@ ROLLBACK TRANSACTION;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
-INSERT INTO #LogInfo
-(TableName
-,VlfStatus
-,VlfTypeSizeMb
-,VlfTypeCount
-,[Duration (ms)])
 SELECT 
 N'ROLLBACK 1000' AS TableName,
 CASE
@@ -74,21 +54,22 @@ CASE
 END AS VlfStatus, 
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
-@Duration
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+@Duration  AS Duration
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
 
 BEGIN TRANSACTION
 
-DELETE FROM AdrTest1000000
+UPDATE AdrTest1000000
+SET TextCol1 = 'Changed'
 WHERE RowId % 2 = 0;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
 SELECT 
-N'DELETE 1M' AS TableName,
+N'Update 1M' AS TableName,
 CASE
 	WHEN vlf_status = 0 THEN N'Free'
 	WHEN vlf_status = 2 THEN N'Active'
@@ -96,7 +77,7 @@ END AS VlfStatus,
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
 @Duration AS [Duration (ms)]
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
@@ -105,12 +86,6 @@ ROLLBACK TRANSACTION;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
-INSERT INTO #LogInfo
-(TableName
-,VlfStatus
-,VlfTypeSizeMb
-,VlfTypeCount
-,[Duration (ms)])
 SELECT 
 N'ROLLBACK 1M' AS TableName,
 CASE
@@ -119,21 +94,22 @@ CASE
 END AS VlfStatus, 
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
-@Duration
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+@Duration AS Duration
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
 
 BEGIN TRANSACTION
 
-DELETE FROM AdrTest100M
+UPDATE AdrTest100M
+SET TextCol1 = 'Changed'
 WHERE RowId % 2 = 0;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
 SELECT 
-N'DELETE 100M' AS TableName,
+N'Update 100M' AS TableName,
 CASE
 	WHEN vlf_status = 0 THEN N'Free'
 	WHEN vlf_status = 2 THEN N'Active'
@@ -141,7 +117,7 @@ END AS VlfStatus,
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
 @Duration AS [Duration (ms)]
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
 SELECT @starttime = CURRENT_TIMESTAMP;
@@ -150,12 +126,6 @@ ROLLBACK TRANSACTION;
 
 SELECT @Duration = DATEDIFF(MILLISECOND,@starttime,CURRENT_TIMESTAMP);
 
-INSERT INTO #LogInfo
-(TableName
-,VlfStatus
-,VlfTypeSizeMb
-,VlfTypeCount
-,[Duration (ms)])
 SELECT 
 N'ROLLBACK 100M' AS TableName,
 CASE
@@ -164,9 +134,7 @@ CASE
 END AS VlfStatus, 
 SUM(vlf_size_mb) AS [VlfTypeSize (MB)], 
 COUNT(*) AS VlfTypeCount,
-@Duration
-FROM sys.dm_db_log_info(DB_ID(N'AdrMetrics'))
+@Duration AS Duration
+FROM sys.dm_db_log_info(DB_ID(N'NonAdrTest'))
 GROUP BY vlf_status;
 
-SELECT *
-FROM #LogInfo;
